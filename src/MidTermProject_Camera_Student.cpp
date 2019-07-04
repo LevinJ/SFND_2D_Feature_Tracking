@@ -22,6 +22,8 @@ using namespace std;
 /* MAIN PROGRAM */
 int main(int argc, const char *argv[])
 {
+	Performance_test();
+	return 0;
 
     /* INIT VARIABLES AND DATA STRUCTURES */
 
@@ -67,7 +69,7 @@ int main(int argc, const char *argv[])
         dataBuffer.push_back(frame);
 
         //// EOF STUDENT ASSIGNMENT
-        cout << "#1 : LOAD IMAGE INTO BUFFER done" << endl;
+        cout << "#1 : LOAD IMAGE INTO BUFFER done, image ***"<< imgIndex + 1<<"***"<< endl;
 
         /* DETECT IMAGE KEYPOINTS */
 
@@ -77,7 +79,7 @@ int main(int argc, const char *argv[])
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
-        //// -> HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+        //// -> SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
         bVis = false;
         if (detectorType.compare("SHITOMASI") == 0)
         {
@@ -109,13 +111,13 @@ int main(int argc, const char *argv[])
         }
         keypoints = std::move(filtered_keypoints);
         cout << detectorType<< " detector with n= " << keypoints.size() << " keypoints, filtered" << endl;
-        bVis = true;
+        bVis = false;
         if (bVis)
 		{
 			cv::Mat visImage = img.clone();
 			cv::drawKeypoints(img, keypoints, visImage, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 			string windowName = detectorType + "  Corner Detector Results: filtered";
-			cv::namedWindow(windowName, 6);
+			cv::namedWindow(windowName);
 			imshow(windowName, visImage);
 			cv::waitKey(0);
 		}
@@ -147,7 +149,7 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        string descriptorType = "SIFT"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+        string descriptorType = "ORB"; // BRIEF, ORB, FREAK, AKAZE, SIFT
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
         //// EOF STUDENT ASSIGNMENT
 
@@ -163,16 +165,19 @@ int main(int argc, const char *argv[])
 
             vector<cv::DMatch> matches;
             string matcherType = "MAT_BF";        // MAT_BF, MAT_FLANN
-            string descriptorType = "DES_HOG"; // DES_BINARY, DES_HOG
-            string selectorType = "SEL_NN";       // SEL_NN, SEL_KNN
+            string descriptorSubType = "DES_BINARY"; // DES_BINARY, DES_HOG
+            if(descriptorType.compare("SIFT") == 0) {
+            	descriptorSubType = "DES_HOG";
+            }
+            string selectorType = "SEL_KNN";       // SEL_NN, SEL_KNN
 
             //// STUDENT ASSIGNMENT
             //// TASK MP.5 -> add FLANN matching in file matching2D.cpp
             //// TASK MP.6 -> add KNN match selection and perform descriptor distance ratio filtering with t=0.8 in file matching2D.cpp
 
-            matchDescriptors((dataBuffer.end() - 2)->keypoints, (dataBuffer.end() - 1)->keypoints,
-                             (dataBuffer.end() - 2)->descriptors, (dataBuffer.end() - 1)->descriptors,
-                             matches, descriptorType, matcherType, selectorType);
+            matchDescriptors(dataBuffer.tail_prev()->keypoints, (dataBuffer.end() - 1)->keypoints,
+                             dataBuffer.tail_prev()->descriptors, (dataBuffer.end() - 1)->descriptors,
+                             matches, descriptorSubType, matcherType, selectorType);
 
             //// EOF STUDENT ASSIGNMENT
 
@@ -191,7 +196,13 @@ int main(int argc, const char *argv[])
                                 matches, matchImg,
                                 cv::Scalar::all(-1), cv::Scalar::all(-1),
                                 vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+//                cv::drawMatches((dataBuffer.end() -2 )->cameraImg, (dataBuffer.end()-2) ->keypoints,
+//                                                (dataBuffer.end() - 1)->cameraImg, (dataBuffer.end() - 1)->keypoints,
+//                                                matches, matchImg,
+//                                                cv::Scalar::all(-1), cv::Scalar::all(-1),
+//                                                vector<char>(), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
+                cv::resize(matchImg, matchImg, cv::Size(), 0.5, 0.5);
                 string windowName = "Matching keypoints between two camera images";
                 cv::namedWindow(windowName, 7);
                 cv::imshow(windowName, matchImg);
