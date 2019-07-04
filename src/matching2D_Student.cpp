@@ -428,12 +428,12 @@ void Performance_test()
 		auto &detector_extraction_name = test.first;
 		auto &data = test.second;
 		int matched_num = int(data[0]);
-		int detetecion_time = int(data[1]);
-		int extraction_time = int(data[2]);
-		int overall_time = detetecion_time + extraction_time;
+		float detetecion_time = data[1];
+		float extraction_time = data[2];
+		float overall_time = detetecion_time + extraction_time;
 
 
-		cout<<detector_extraction_name<<", "<<matched_num<<", "<<overall_time<<", "<<detetecion_time<<", "<<extraction_time<<endl;
+		cout<< std::fixed << std::setprecision(1)<<detector_extraction_name<<", "<<overall_time<<", "<<matched_num<<", "<<detetecion_time<<", "<<extraction_time<<endl;
 	}
 
 }

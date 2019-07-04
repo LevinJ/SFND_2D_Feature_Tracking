@@ -22,8 +22,11 @@ using namespace std;
 /* MAIN PROGRAM */
 int main(int argc, const char *argv[])
 {
-	Performance_test();
-	return 0;
+//	Performance_test();
+//	return 0;
+
+	string detectorType = "FAST";//SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+	string descriptorType = "SIFT"; // BRIEF, ORB, FREAK, AKAZE, SIFT
 
     /* INIT VARIABLES AND DATA STRUCTURES */
 
@@ -75,7 +78,7 @@ int main(int argc, const char *argv[])
 
         // extract 2D keypoints from current image
         vector<cv::KeyPoint> keypoints; // create empty feature list for current image
-        string detectorType = "SIFT";
+
 
         //// STUDENT ASSIGNMENT
         //// TASK MP.2 -> add the following keypoint detectors in file matching2D.cpp and enable string-based selection based on detectorType
@@ -111,7 +114,7 @@ int main(int argc, const char *argv[])
         }
         keypoints = std::move(filtered_keypoints);
         cout << detectorType<< " detector with n= " << keypoints.size() << " keypoints, filtered" << endl;
-        bVis = false;
+        bVis = true;
         if (bVis)
 		{
 			cv::Mat visImage = img.clone();
@@ -149,7 +152,7 @@ int main(int argc, const char *argv[])
         //// -> BRIEF, ORB, FREAK, AKAZE, SIFT
 
         cv::Mat descriptors;
-        string descriptorType = "ORB"; // BRIEF, ORB, FREAK, AKAZE, SIFT
+
         descKeypoints((dataBuffer.end() - 1)->keypoints, (dataBuffer.end() - 1)->cameraImg, descriptors, descriptorType);
         //// EOF STUDENT ASSIGNMENT
 
@@ -187,7 +190,7 @@ int main(int argc, const char *argv[])
             cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
             // visualize matches between current and previous image
-            bVis = true;
+            bVis = false;
             if (bVis)
             {
                 cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
