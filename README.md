@@ -70,12 +70,15 @@ Brute force matching and FLANN matching are both implemented, and are selectabel
 In an attempt to fitler out mismatch(especially scense with repeated texture), desriptor distance ratio test is implemented. It use k nearest neighbour, find the ratio of best and second best match. If the ratio is above a certain threshold (like 0.8), we would say these two matches are too close, and won't be certain that we are making the right match if we just pick the best match.
 ## Performance
 
-For the varios detector and descriptor combination, we evalaute their performance by the matched keypoints number, and matching speed. 
+For the varios detector and descriptor combination, we evalaute their performance by the matched keypoints number, and matching speed. Please note that the detector and descriptor are mostly using OpenCV default parameters in current project, and if custorm parameters are applied, below statistics will certainly change.  
 ### Keypoints Detection Number
-As mentioned above, SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT keypoint detector are implemented. The number of keypoints on the preceding vehicle for all 10 image as below.
+As mentioned above, SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT keypoint detector are implemented. The number of keypoints on the preceding vehicle for all 10 image as below.  
 
 <img src="images/keypoints_number.png" />
 
+Regarding the  distribution of keypoint neighborhood size, SHITOMASI, HARRIS, and FAST are all fixed and are scale variant. the remaining detectors are scale invariant, and the keypoint size are adjustable by input parameters.  
+
+I also notice that, for all detectors, some of the keypoints dectors are not really on the vehicles, this could be an issue we might have to deal with in the following object tracking project.
 
 ### Keypoints Matching Number and time
 
@@ -85,11 +88,18 @@ For all possible combinations of detectors and descriptors, Below are the matche
 
 Recommended combinations for our purpose of detecting keypoints on vehicles are:
 
-1) FAST-BRIEF
-2) ORB-ORB
-3) FAST-SIFT
+1) FAST-BRIEF  
+FAST detector and BRIEF descriptor combination is recommended as it's the fastest, and takes only 1.4 ms for both keypoint detection and descriptor extraction. Its disadvantage is that is not scale and orientation invariant.  
+2) ORB-ORB   
 
+ORB-ORB is very fast too. its scale and orientation invariant.  
+
+3) FAST-SIFT  
+
+FAST-SIFT (13ms) is fast enough for our vehicle tracking purpose, at the same, as SIFT desciptor use HOG, which is proven effective in object tracking, this combination is worth being further examined too.   
 
 ## Refelction
+
+This project does an interesting job of thoroughly experimenting all important components of feature tracking, including keypoint detector, descriptor, and matcher. Based the experimentation data, three top detector/descriptor are recommended for the vehicle tracking in following project. Currenlty the evaluation metric are strictly about matched points number and speed, this preclues another critical factor out of the picture, matching accuracy. I am excited to put the result of this project into use in the next object tracking project, and see how the detector/descriptor combinations goes. 
 
 
