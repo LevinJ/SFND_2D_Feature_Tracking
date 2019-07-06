@@ -1,34 +1,95 @@
 # SFND 2D Feature Tracking
 
+Course project for Udacity Sensor Fusion Engineer Nanodegree Program
+
 <img src="images/keypoints.png" width="820" height="248" />
 
-The idea of the camera course is to build a collision detection system - that's the overall goal for the Final Project. As a preparation for this, you will now build the feature tracking part and test various detector / descriptor combinations to see which ones perform best. This mid-term project consists of four parts:
+Build a suitable image feature tracking pipeline which will be finally used in object tracking, via exprimenting various detector/descriptor/Matcher combinations to see which ones perform best. 
 
-* First, you will focus on loading images, setting up data structures and putting everything into a ring buffer to optimize memory load. 
-* Then, you will integrate several keypoint detectors such as HARRIS, FAST, BRISK and SIFT and compare them with regard to number of keypoints and speed. 
-* In the next part, you will then focus on descriptor extraction and matching using brute force and also the FLANN approach we discussed in the previous lesson. 
-* In the last part, once the code framework is complete, you will test the various algorithms in different combinations and compare them with regard to some performance measures. 
+Below are a high level introduction on major components of this feature tracking pipeline.
 
-See the classroom instruction and code comments for more details on each of these parts. Once you are finished with this project, the keypoint matching part will be set up and you can proceed to the next lesson, where the focus is on integrating Lidar points and on object detection using deep-learning. 
+## Data Buffer
 
-## Dependencies for Running Locally
-* cmake >= 2.8
-  * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1 (Linux, Mac), 3.81 (Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* OpenCV >= 4.1
-  * This must be compiled from source using the `-D OPENCV_ENABLE_NONFREE=ON` cmake flag for testing the SIFT and SURF detectors.
-  * The OpenCV 4.1.0 source code can be found [here](https://github.com/opencv/opencv/tree/4.1.0)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
+A ring buffer is a fixed size buffter that would overwrite old data if buffer capacity is reached. 
 
-## Basic Build Instructions
+In this project, a simplifed version of ring buffer is implemented, in that the buffer only exposes interfaces for adding data, and does not expose interfaces for remove data. But this implementation suffice the needs of this project, as we only push new image frame related data to the buffer.
 
-1. Clone this repo.
-2. Make a build directory in the top level directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./2D_feature_tracking`.
+The ring buffer is implemented in the `RingBuffer` class template in RingBuffer.h. it mainly use a head and tail pointer to keep track of where to add data. See RingBuffer.h for implementation details.
+
+## Keypoints
+
+Keypoints in the whole iamge are extracted, and then only the keypoints in area around preceding vehicle are retained.
+
+### Keypoint Detection
+SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT keypoint detector are implemented with OpendCV API, and they are selectable in the pipeline via variable `detectorType`.
+
+###  Keypoint Removal
+
+We then use a fixed rectange to fitler out keypoints that are within the neighbourhood of the preceding cars. The result for various detectors are as below,
+
+1) SHITOMASI 
+
+<img src="images/SHITOMASI.png" width="820" height="248" />
+
+
+2) HARRIS 
+
+<img src="images/HARRIS.png" width="820" height="248" />
+
+3) FAST 
+
+<img src="images/FAST.png" width="820" height="248" />
+
+4) BRISK 
+
+<img src="images/BRISK.png" width="820" height="248" />
+
+5) ORB 
+
+<img src="images/ORB.png" width="820" height="248" />
+
+6) AKAZE 
+
+<img src="images/AKAZE.png" width="820" height="248" />
+
+7) SIFT 
+
+<img src="images/SIFT.png" width="820" height="248" />
+
+
+
+## Descriptors
+
+For each keypoint obtained in current frame, we extract its corresponding feature descriptors. then we match previous frame to current frame based on the descriptors. Descriptor distance ratio is used to filter out likely incorrect matches.
+
+### Keypoint Descriptors
+BRIEF, ORB, FREAK, AKAZE, SIFT keypoint descriptors are implemented, and they ar selectabel by variabel `descriptorType`. 
+### Descriptor Matching
+Brute force matching and FLANN matching are both implemented, and are selectabel by variable `matcherType`.
+### Descriptor Distance Ratio
+In an attempt to fitler out mismatch(especially scense with repeated texture), desriptor distance ratio test is implemented. It use k nearest neighbour, find the ratio of best and second best match. If the ratio is above a certain threshold (like 0.8), we would say these two matches are too close, and won't be certain that we are making the right match if we just pick the best match.
+## Performance
+
+For the varios detector and descriptor combination, we evalaute their performance by the matched keypoints number, and matching speed. 
+### Keypoints Detection Number
+As mentioned above, SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, and SIFT keypoint detector are implemented. The number of keypoints on the preceding vehicle for all 10 image as below.
+
+<img src="images/keypoints_number.png" />
+
+
+### Keypoints Matching Number and time
+
+For all possible combinations of detectors and descriptors, Below are the matched keypoint nubmer and time. Note that the combination listed by the asceding order of speed. In the matching step, the BF approach is used with the descriptor distance ratio set to 0.8.
+
+<img src="images/match_num_time.png" />
+
+Recommended combinations for our purpose of detecting keypoints on vehicles are:
+
+1) FAST-BRIEF
+2) ORB-ORB
+3) FAST-SIFT
+
+
+## Refelction
+
+
