@@ -25,7 +25,7 @@ int main(int argc, const char *argv[])
 //	Performance_test();
 //	return 0;
 
-	string detectorType = "FAST";//SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
+	string detectorType = "SIFT";//SHITOMASI, HARRIS, FAST, BRISK, ORB, AKAZE, SIFT
 	string descriptorType = "SIFT"; // BRIEF, ORB, FREAK, AKAZE, SIFT
 
     /* INIT VARIABLES AND DATA STRUCTURES */
@@ -190,7 +190,7 @@ int main(int argc, const char *argv[])
             cout << "#4 : MATCH KEYPOINT DESCRIPTORS done" << endl;
 
             // visualize matches between current and previous image
-            bVis = false;
+            bVis = true;
             if (bVis)
             {
                 cv::Mat matchImg = ((dataBuffer.end() - 1)->cameraImg).clone();
